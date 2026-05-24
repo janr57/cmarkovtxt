@@ -1,0 +1,7 @@
+# .gitignore
+
+*~
+cmarkovtxt
+cmarkovtxt2
+el_quijote.txt
+texto.txt
