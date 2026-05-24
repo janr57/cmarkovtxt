@@ -1,16 +1,13 @@
-# Makefile for 'cmarkovtxt*.c'
+# Makefile for 'cmarkovtxt.c'
 
 
 cmarkovtxt: cmarkovtxt.c
 	gcc -O3 $< -o $@
 
-cmarkovtxt2: cmarkovtxt2.c
-	gcc -O3 $< -o $@
-
-all: cmarkovtxt cmarkovtxt2
+all: cmarkovtxt
 
 .PHONY: clean
 
 clean:
-	rm -rf cmarkovtxt cmarkovtxt2 *~ 
+	rm -rf cmarkovtxt *~ 
 
