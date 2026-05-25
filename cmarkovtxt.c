@@ -9,8 +9,10 @@ int es_vocal_unicode(uint32_t cp) {
         cp == 'A' || cp == 'E' || cp == 'I' || cp == 'O' || cp == 'U') return 1;
 
     switch (cp) {
-        case 0x00C0: case 0x00C1: case 0x00C2: case 0x00C3: case 0x00C4: case 0x00C5: case 0x00C6:
-        case 0x00E0: case 0x00E1: case 0x00E2: case 0x00E3: case 0x00E4: case 0x00E5: case 0x00E6:
+        case 0x00C0: case 0x00C1: case 0x00C2: case 0x00C3: case 0x00C4: case 0x00C5:
+        case 0x00C6:
+        case 0x00E0: case 0x00E1: case 0x00E2: case 0x00E3: case 0x00E4: case 0x00E5:
+        case 0x00E6:
         case 0x00C8: case 0x00C9: case 0x00CA: case 0x00CB:
         case 0x00E8: case 0x00E9: case 0x00EA: case 0x00EB:
         case 0x00CC: case 0x00CD: case 0x00CE: case 0x00CF:
@@ -43,11 +45,11 @@ void mostrar_ayuda(const char *nombre_programa) {
 }
 
 int procesar_archivo(const char *ruta, int mostrar_barra) {
-    printf("Abriendo archivo: '%s'\n", ruta);
+  //printf("Abriendo archivo: '%s'\n", ruta);
 
     FILE *file = fopen(ruta, "rb"); 
     if (!file) {
-        printf("Error: No se pudo abrir el archivo '%s'. Verifique la ruta.\n", ruta);
+        printf("Error al abrir el archivo '%s'. Verifique la ruta.\n", ruta);
         return 1;
     }
 
@@ -65,7 +67,7 @@ int procesar_archivo(const char *ruta, int mostrar_barra) {
 
     size_t capacidad = total_bytes; 
     size_t total_elementos = 0;
-    char *resultado_final = malloc(capacidad * sizeof(char));
+    char *resultado = malloc(capacidad * sizeof(char));
 
     long bytes_leidos = 0;
     int ultimo_porcentaje = -1;
@@ -77,7 +79,8 @@ int procesar_archivo(const char *ruta, int mostrar_barra) {
         
         uint32_t code_point = 0;
         int bytes_extra = 0;
-        unsigned char b = (unsigned char)c; // Forzamos a que sea un byte sin signo (0-255)
+	// Forzamos a que sea un byte sin signo (0-255)
+        unsigned char b = (unsigned char)c;
 
         // Determinar cuántos bytes ocupa el carácter según los bits iniciales
         if (b <= 0x7F) {
@@ -93,7 +96,8 @@ int procesar_archivo(const char *ruta, int mostrar_barra) {
             code_point = b & 0x07; // Inicio de carácter de 4 bytes (Emojis...)
             bytes_extra = 3;
         } else {
-            continue; // Byte de continuación suelto o inválido, lo ignoramos de forma segura
+	  // Byte de continuación suelto o inválido, se ignora de forma segura
+            continue;
         }
 
         // Leer los bytes restantes que forman el carácter completo
@@ -106,9 +110,10 @@ int procesar_archivo(const char *ruta, int mostrar_barra) {
             }
             bytes_leidos++;
             unsigned char next_b = (unsigned char)siguiente;
-            if ((next_b & 0xC0) != 0x80) { // Validación de estructura UTF-8
-                lectura_valida = 0;
-                break;
+            if ((next_b & 0xC0) != 0x80) {
+	      // Validación de estructura UTF-8
+	      lectura_valida = 0;
+	      break;
             }
             code_point = (code_point << 6) | (next_b & 0x3F);
         }
@@ -118,9 +123,9 @@ int procesar_archivo(const char *ruta, int mostrar_barra) {
             if (es_letra_unicode(code_point)) {
                 if (total_elementos >= capacidad) {
                     capacidad *= 2;
-                    resultado_final = realloc(resultado_final, capacidad * sizeof(char));
+                    resultado = realloc(resultado, capacidad * sizeof(char));
                 }
-                resultado_final[total_elementos++] = es_vocal_unicode(code_point) ? 1 : 0;
+                resultado[total_elementos++] = es_vocal_unicode(code_point) ? 1 : 0;
             }
         }
 
@@ -147,7 +152,7 @@ int procesar_archivo(const char *ruta, int mostrar_barra) {
     printf("¡Proceso completado con éxito!\n");
     printf("Total de letras procesadas en el array: %zu\n", total_elementos);
 
-    free(resultado_final);
+    free(resultado);
     return 0;
 }
 
